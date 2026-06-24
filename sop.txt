@@ -1,0 +1,21 @@
+Coffee beans must be dried to 12% moisture.
+Grade A beans require yield above 22%.
+Machine speed should remain below 180 RPM.
+Roasting temperature must not exceed 220 degrees Celsius.
+Grade B beans require yield above 15%.
+Storage humidity must be kept below 60% relative humidity.
+Beans must be stored at a temperature between 15 and 25 degrees Celsius.
+Each batch must be labeled with the harvest date and lot number.
+Quality inspection is required every 4 hours during production.
+Defective beans must not exceed 3% of total batch weight.
+Packaging must occur within 48 hours of roasting.
+Machines must be cleaned and sanitized at the start of every shift.
+Operators must wear gloves and hairnets at all times on the production floor.
+Any batch with moisture above 14% must be rejected and re-dried.
+Cooling time after roasting must be at least 20 minutes before packaging.
+Conveyor belt speed must not exceed 0.5 meters per second.
+All scales must be calibrated weekly and logged in the maintenance sheet.
+Bags must be sealed within 10 minutes of filling to preserve freshness.
+Any equipment malfunction must be reported to the shift supervisor immediately.
+Final products must pass a metal detector scan before shipment.
+ 
