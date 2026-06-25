@@ -1,499 +1,77 @@
-# 🎓 PDF RAG Assistant - Lecture Note Analyzer
+# 🎓 PDF RAG Assistant
 
-A local **Retrieval-Augmented Generation (RAG)** application that allows users to upload PDF documents (lecture slides, notes, manuals, research papers, etc.) and ask questions about their content.
+> **Learning project** — built to understand how local RAG pipelines work end-to-end (LLMs, embeddings, vector search, chunking). Not production-ready; treat it as a reference, not a deployable app.
 
-The system uses:
+A local Retrieval-Augmented Generation (RAG) tool: upload PDFs, ask questions, get answers grounded only in the document content — no cloud APIs involved.
 
-- **LangChain** for RAG orchestration
-- **Ollama + Llama 3.2** as the local Large Language Model
-- **HuggingFace Sentence Transformers** for embeddings
-- **Streamlit** for the interactive web interface
-- **Vector Search** for document retrieval
+## What it does
 
-The entire pipeline runs locally without requiring external AI APIs.
+- Loads up to **5 PDFs at once** into memory, tagged by filename and page number
+- Splits each PDF into overlapping text chunks and embeds them locally
+- Answers questions by retrieving the most relevant chunks and feeding them to a local LLM
+- Lets you scope a question to **all loaded PDFs** or just **specific ones**
+- PDFs stay loaded until removed manually — nothing auto-evicts
+- Works both as a **Streamlit web UI** and a **terminal REPL**
 
----
+## Stack
 
-# 🚀 Features
-
-## 📄 PDF Document Understanding
-
-- Upload any PDF document
-- Automatically extract text from the document
-- Split large documents into searchable chunks
-- Generate embeddings for semantic search
-
----
-
-## 🔍 Retrieval-Augmented Generation (RAG)
-
-The system follows the RAG architecture:
-
-```
-
-PDF Upload
-|
-↓
-Text Extraction
-|
-↓
-Document Chunking
-|
-↓
-Embedding Generation
-|
-↓
-Vector Store
-|
-↓
-Similarity Search
-|
-↓
-Relevant Context Retrieval
-|
-↓
-Local LLM Response
-
-```
-
-The LLM answers questions using only the retrieved document context, reducing hallucinations.
-
----
-
-# 🖥️ Application Interface
-
-The Streamlit frontend provides:
-
-- PDF upload interface
-- Model configuration
-- Retrieval parameter tuning
-- Chat-based interaction
-- Retrieved context visualization
-- Chat history management
-
----
-
-# 🏗️ Project Structure
-
-```
-
-PDF-RAG-Assistant/
-│
-├── app.py                  # Streamlit frontend
-│
-├── lecture_rag.py          # Backend RAG pipeline
-│
-├── lecture_slides.pdf      # Sample PDF document
-│
-├── requirements.txt        # Python dependencies
-│
-├── README.md               # Documentation
-│
-└── temp_files/             # Temporary uploaded PDFs
-
-```
-
----
-
-# ⚙️ Technologies Used
-
-## Backend
-
-| Technology | Purpose |
+| Component | Tool |
 |---|---|
-| Python | Core programming language |
-| LangChain | RAG pipeline framework |
-| PyPDFLoader | PDF text extraction |
-| RecursiveCharacterTextSplitter | Document chunking |
-| HuggingFace Embeddings | Text vector generation |
-| InMemoryVectorStore | Similarity search database |
-| Ollama | Local LLM execution |
+| LLM | Ollama running `llama3.2:1b` |
+| Embeddings | `sentence-transformers/all-MiniLM-L6-v2` (HuggingFace) |
+| Orchestration | LangChain |
+| Vector store | `InMemoryVectorStore` (shared across all loaded PDFs) |
+| Chunking | `RecursiveCharacterTextSplitter` (600 chars, 100 overlap) |
+| PDF parsing | `PyPDFLoader` |
+| Frontend | Streamlit |
 
----
-
-## AI Models
-
-### Language Model
+## How it works
 
 ```
-
-llama3.2:1b
-
+PDF(s) → extract text → chunk + tag (source, page) → embed
+       → shared vector store → similarity search (optionally filtered by source)
+       → context + question → local LLM → answer
 ```
 
-Runs locally using Ollama.
-
-Purpose:
-
-- Answer user questions
-- Generate natural language responses
-- Use retrieved document context
-
-
-### Embedding Model
-
-```
-
-sentence-transformers/all-MiniLM-L6-v2
-
-````
-
-Purpose:
-
-Convert text into numerical vectors for semantic search.
-
----
-
-# 📦 Installation
-
-## 1. Clone Repository
-
-```bash
-git clone https://github.com/BandaraTWMBA/RagBased_LectureNoteAnalyser.git
-
-cd RagBased_LectureNoteAnalyser
-````
-
----
-
-## 2. Create Virtual Environment
-
-Windows:
-
-```bash
-python -m venv venv
-
-venv\Scripts\activate
-```
-
-Linux/Mac:
-
-```bash
-python3 -m venv venv
-
-source venv/bin/activate
-```
-
----
-
-## 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-# 🤖 Install Ollama
-
-Download Ollama:
-
-[https://ollama.com](https://ollama.com)
-
-Verify installation:
-
-```bash
-ollama --version
-```
-
----
-
-## Download LLM Model
-
-Pull Llama 3.2:
-
-```bash
-ollama pull llama3.2:1b
-```
-
-Check installed models:
-
-```bash
-ollama list
-```
-
----
-
-# ▶️ Running the Application
-
-## Start Ollama Server
-
-Open terminal:
+## Run it
 
 ```bash
 ollama serve
+ollama pull llama3.2:1b
+pip install -r requirements.txt
 ```
 
----
-
-## Start Streamlit Frontend
-
-Open another terminal:
-
+**Web UI:**
 ```bash
 streamlit run app.py
 ```
 
-The application will open:
-
-```
-http://localhost:8501
-```
-
----
-
-# 💬 Usage
-
-## Step 1
-
-Upload a PDF file from the sidebar.
-
-Example:
-
-```
-Machine_Learning_Lecture.pdf
+**Terminal (no GUI):**
+```bash
+python lecture_rag.py
+> load slides.pdf
+> What is backpropagation?
+> only slides.pdf
+> exit
 ```
 
----
+REPL commands: `load <path>`, `list`, `remove <file>`, `clear`, `only <file1,file2>`, `all`, `exit`.
 
-## Step 2
-
-The system will:
+## Files
 
 ```
-Reading PDF
-      |
-      ↓
-Extracting text
-      |
-      ↓
-Creating chunks
-      |
-      ↓
-Generating embeddings
-      |
-      ↓
-Building vector index
+app.py            # Streamlit frontend
+lecture_rag.py    # Backend: PDFLibrary class, ask(), REPL
+requirements.txt
 ```
 
----
+## Privacy
 
-## Step 3
+Everything runs locally — no data leaves your machine. Uploaded files are deleted from disk right after indexing; only in-memory embeddings persist for the session.
 
-Ask questions.
+## Known limitations
 
-Example:
-
-```
-What is backpropagation?
-```
-
-The system:
-
-1. Searches the PDF
-2. Retrieves relevant sections
-3. Sends context to Llama
-4. Generates the answer
-
----
-
-# 🧠 Example Output
-
-```
-Question:
-
-What is gradient descent?
-
-
-Retrieved Context:
-
-[Slide/Page 12]
-
-Gradient descent is an optimization algorithm
-used to minimize the loss function.
-
-
-Answer:
-
-Gradient descent is an optimization method
-that updates model parameters to reduce error.
-```
-
----
-
-# 🧩 Backend Architecture
-
-## PDF Processing
-
-Implemented in:
-
-```
-lecture_rag.py
-```
-
-Function:
-
-```python
-load_vector_store()
-```
-
-Responsibilities:
-
-* Load PDF
-* Extract text
-* Split documents
-* Create embeddings
-* Build vector database
-
----
-
-## Question Answering
-
-Function:
-
-```python
-ask()
-```
-
-Responsibilities:
-
-1. Retrieve relevant chunks
-
-```python
-similarity_search()
-```
-
-2. Build prompt
-
-```
-Context + Question
-```
-
-3. Query Llama model
-
-4. Return answer
-
----
-
-# 🌐 Frontend Architecture
-
-Implemented in:
-
-```
-app.py
-```
-
-Built using Streamlit.
-
-Features:
-
-### Session Management
-
-Stores:
-
-```python
-st.session_state
-```
-
-including:
-
-* Chat history
-* Current document index
-* Uploaded file
-
-### PDF Upload
-
-```python
-st.file_uploader()
-```
-
-Allows dynamic document loading.
-
-### Chat Interface
-
-Uses:
-
-```python
-st.chat_input()
-st.chat_message()
-```
-
-to create ChatGPT-like interaction.
-
----
-
-# 🧪 Testing Retrieval Pipeline
-
-Example test document:
-
-```
-The learning rate controls the size of updates
-during gradient descent.
-```
-
-Question:
-
-```
-What controls update size?
-```
-
-Expected:
-
-```
-The learning rate controls the size of updates.
-```
-
-This verifies:
-
-✅ PDF extraction
-✅ Chunking
-✅ Embeddings
-✅ Retrieval
-✅ LLM generation
-
----
-
-# 🔐 Privacy
-
-This application runs completely locally.
-
-No data is sent to:
-
-* OpenAI
-* Cloud AI services
-* External APIs
-
-Uploaded documents stay on your machine.
-
----
-
-# 🔮 Future Improvements
-
-Possible enhancements:
-
-* Replace InMemoryVectorStore with ChromaDB/FAISS
-* Add conversation memory
-* Add PDF page highlighting
-* Support DOCX and PPTX files
-* Add authentication
-* Deploy using Docker
-* Add citation extraction
-* Add multi-document search
-
----
-
-# 👨‍💻 Author
-
-**BandaraTWMBA**
-
-GitHub:
-
-[https://github.com/BandaraTWMBA](https://github.com/BandaraTWMBA)
-
----
-
-# 📜 License
-
-This project is for educational and research purposes.
-
-```
+- No persistence — restarting clears everything (in-memory store only)
+- No conversation memory — each question is independent
+- 5-PDF cap is hardcoded
+- `remove_pdf()` reaches into `InMemoryVectorStore`'s internals (no public delete-by-filter API exists yet)
